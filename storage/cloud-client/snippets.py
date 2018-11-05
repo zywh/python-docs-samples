@@ -38,6 +38,15 @@ def create_bucket(bucket_name):
     print('Bucket {} created'.format(bucket.name))
 
 
+def list_buckets(bucket_name):
+    """Lists all buckets."""
+    storage_client = storage.Client()
+    buckets = storage_client.list_buckets()
+
+    for bucket in buckets:
+        print(bucket.name)
+
+
 def delete_bucket(bucket_name):
     """Deletes a bucket. The bucket must be empty."""
     storage_client = storage.Client()
