@@ -1,0 +1,21 @@
+# This file is used to generate README.rst
+
+product:
+  name: OpenCensus
+  short_name: OpenCensus
+  url: https://cloud.google.com/monitoring/custom-metrics/open-census
+  description: >
+    `OpenCensus`_ collects custom metrics from applications and displays
+    them in near real time in the Google Cloud Platform Console.
+
+setup:
+- auth
+- install_deps
+
+samples:
+- name: Quickstart
+  file: quickstart.py
+
+cloud_client_library: true
+
+folder: opencensus
