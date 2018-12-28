@@ -75,7 +75,7 @@ def main(iteration_count):
     # Ten percent of the time, simulated "extra" processing adds 500ms
     for i in range(iteration_count):
         # Randomly pick a kind of processing
-        if random.random() <= 0.10:
+        if random.random() <= 0.5:
             kind = 'extra'
         else:
             kind = 'normal'
@@ -90,8 +90,10 @@ def main(iteration_count):
         measure_map.measure_float_put(latency_measure, duration)
         tag_map = opencensus.tags.TagMap()
         tag_map.insert(latency_key, opencensus.tags.tag_value.TagValue(kind))
+        print(duration)
 
     measure_map.record(tag_map)
+    time.sleep(60)
 # [END monitoring_opencensus_metrics_quickstart]
 
 
