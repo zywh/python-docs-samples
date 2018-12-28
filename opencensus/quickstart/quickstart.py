@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START monitoring_opencensus_metrics_quickstart]
+
 import time
 import random
 
@@ -23,7 +25,7 @@ import opencensus.tags
 
 from opencensus.stats.exporters import stackdriver_exporter
 
-
+# [START setup_exporter]
 # Set up the metric to be tracked
 
 # Latency of two kinds of simulated operations, "normal" and "extra"
@@ -45,8 +47,8 @@ latency_view = view.View(
     latency_distribution
 )
 
-
 # Initialization
+
 statistics = stats.Stats()
 
 view_manager = statistics.view_manager
@@ -57,14 +59,7 @@ exporter = stackdriver_exporter.new_stats_exporter(
 
 view_manager.register_exporter(exporter)
 view_manager.register_view(latency_view)
-
-# [START monitoring_opencensus_metrics_quickstart]
-
-# [START setup_exporter]
-
 # [END setup_exporter]
-
-# [END monitoring_opencensus_metrics_quickstart]
 
 
 def process(kind):
@@ -95,7 +90,9 @@ def main(iteration_count):
         measure_map.measure_float_put(latency_measure, duration)
         tag_map = opencensus.tags.TagMap()
         tag_map.insert(latency_key, opencensus.tags.tag_value.TagValue(kind))
-        measure_map.record(tag_map)
+
+    measure_map.record(tag_map)
+# [END monitoring_opencensus_metrics_quickstart]
 
 
 if __name__ == '__main__':
