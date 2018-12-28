@@ -19,8 +19,7 @@ from opencensus.stats import aggregation
 from opencensus.stats import measure
 from opencensus.stats import stats
 from opencensus.stats import view
-from opencensus.tags import tag_key
-from opencensus.tags import tag_value
+import opencensus.tags
 
 from opencensus.stats.exporters import stackdriver_exporter
 
@@ -28,10 +27,10 @@ from opencensus.stats.exporters import stackdriver_exporter
 # Set up the metric to be tracked
 
 # Latency of two kinds of simulated operations, "normal" and "extra"
-latency_key = tag_key.TagKey("kind")
+latency_key = opencensus.tags.tag_key.TagKey('kind')
 
 # Measure in milliseconds
-latency_measure = measure.MeasureFloat('latency', 'Latency in ms')
+latency_measure = measure.MeasureFloat('latency', 'Latency in ms', 'ms')
 
 # Break into buckets of increasing size
 latency_distribution = aggregation.DistributionAggregation(
@@ -68,7 +67,7 @@ view_manager.register_view(latency_view)
 # [END monitoring_opencensus_metrics_quickstart]
 
 
-def process():
+def process(kind):
     sleep_time = random.random() ** 2  # More interesting than just linear
     if kind == 'extra':
         sleep_time += 0.5
@@ -92,10 +91,10 @@ def main(iteration_count):
         duration = time.time() - start_time
 
         # Record the measurement
-        measure_map = stats_recorder.new_measure_map()
+        measure_map = recorder.new_measurement_map()
         measure_map.measure_float_put(latency_measure, duration)
-        tag_map = tags.TagMap()
-        tag_map.insert(latency_tag, tag_value.TagValue(kind))
+        tag_map = opencensus.tags.TagMap()
+        tag_map.insert(latency_key, opencensus.tags.tag_value.TagValue(kind))
         measure_map.record(tag_map)
 
 
