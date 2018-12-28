@@ -1,0 +1,2 @@
+opencensus==0.1.10
+google-cloud-monitoring==0.31.1
