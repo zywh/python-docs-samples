@@ -23,20 +23,31 @@ from opencensus.stats import measure
 from opencensus.stats import stats
 from opencensus.stats import view
 from opencensus.stats.exporters import stackdriver_exporter
+from opencensus.trace.exporters.transports.background_thread import BackgroundThreadTransport
+
 from opencensus.tags import tag_key
+from opencensus.tags import tag_value
+from opencensus.tags import tag_map
 
 # [START setup_exporter]
 def initialize(project_id):
-    # Records latencies measured in milliseconds, grouped in buckets of
-    # increasing size. Exports to StackDriver for the given project_id
-    latency_measure = measure.MeasureFloat('latency', 'Latency in ms', 'ms')
+    key_method = tag_key.TagKey('kind')
+
+    latency_measure = measure.MeasureFloat(
+        'latency/process_step',
+        'Process Step Latency in milliseconds',
+        'ms'
+    )
+
+    # Track count of latency measures falling in each range
     latency_distribution = aggregation.DistributionAggregation(
         [0, 25, 50, 100, 200, 400, 800, 1600]
     )
+
     latency_view = view.View(
-        'latency',
+        'latency/process_step',
         'Processing time',
-        [tag_key.TagKey('latency')],
+        [key_method],
         latency_measure,
         latency_distribution
     )
@@ -51,7 +62,7 @@ def initialize(project_id):
     view_manager.register_exporter(exporter)
     view_manager.register_view(latency_view)
 
-    return recorder, latency_measure
+    return recorder, latency_measure, key_method
 # [END setup_exporter]
 
 
@@ -65,10 +76,16 @@ def process(kind):
 
 
 def main(project_id, iteration_count):
-    recorder, measure = initialize(project_id)
+    recorder, measure, key_method = initialize(project_id)
+
+    tag_kind = tag_value.TagValue('simulation')
+    key_map = tag_map.TagMap()
+    key_map.insert(key_method, tag_kind)
+    
     measure_map = recorder.new_measurement_map()
 
     for i in range(iteration_count):
+
         # Randomly pick a kind of processing
         if random.random() <= 0.5:
             kind = 'extra'
@@ -79,12 +96,15 @@ def main(project_id, iteration_count):
         start_time = time.time()
         process(kind)
         duration = time.time() - start_time
+        milliseconds = int(round(1000.0 * duration))
 
         # Record the measurement
-        measure_map.measure_float_put(measure, duration)
-        print(duration)
+        measure_map.measure_int_put(measure, milliseconds)
 
-    measure_map.record()
+        # TODO - remove debugging print statement
+        print(milliseconds)
+
+    measure_map.record(key_map)
     time.sleep(60)
 # [END monitoring_opencensus_metrics_quickstart]
 
